@@ -12,9 +12,12 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.2.0",
+    "@uidotdev/usehooks": "^2.4.1-experimental.1",
+    "axios": "^1.11.0",
+    "eslint-plugin-react-hooks": "^0.0.0-experimental-7513996f-20250722",
     "next": "15.4.2",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "react-hook-form": "^7.60.0"
   },
   "devDependencies": {

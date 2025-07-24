@@ -1,6 +1,9 @@
 "use client";
 import { createTheme, TextField, ThemeProvider } from "@mui/material";
 import { useForm } from "react-hook-form";
+import useWeather from "@/services/useWeather";
+import { useState } from "react";
+
 
 const theme = createTheme({
   typography: { fontFamily: "var(--font-schibsted-grotesk)" },
@@ -41,28 +44,6 @@ const theme = createTheme({
   },
 });
 
-const status = [
-  {
-    icon: "/wind.svg",
-    value: "6.69/ms",
-    title: "Wind",
-  },
-  {
-    icon: "/humidity.svg",
-    value: "70%",
-    title: "Humidity",
-  },
-  {
-    icon: "/clouds.svg",
-    value: "40%",
-    title: "Clouds",
-  },
-  {
-    icon: "/realFeel.svg",
-    value: "40%",
-    title: "Real Feel",
-  },
-];
 
 const weeklyForecast = [
   {
@@ -97,14 +78,73 @@ const weeklyForecast = [
   },
 ];
 
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const days = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
 const WeatherApp = () => {
+  const [submittedCity, setSubmittedCity] = useState(null)
+  const weatherData = useWeather(submittedCity)
+  const { error, data } = weatherData
+  console.log(data);
+  const city = data?.city?.name
+  const date = new Date().getDate()
+  const month = new Date().getMonth()
+  const day = new Date().getDay()
+  const todayWeather = {
+    temp: data?.list[0]?.main?.temp,
+  }
+  
+  const status = [
+  {
+    icon: "/wind.svg",
+    value: `${data?.list[0]?.wind?.speed}/ms`,
+    title: "Wind",
+  },
+  {
+    icon: "/humidity.svg",
+    value: `${data?.list[0]?.main?.humidity}%`,
+    title: "Humidity",
+  },
+  {
+    icon: "/clouds.svg",
+    value: `${data?.list[0]?.clouds?.all}%`,
+    title: "Clouds",
+  },
+  {
+    icon: "/realFeel.svg",
+    value: `${data?.list[0]?.main?.feels_like}%`,
+    title: "Real Feel",
+  },
+];
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
   const onSubmit = (data) => {
-    console.log(data);
+    setSubmittedCity(data.city)
   };
   return (
     <section
@@ -137,16 +177,16 @@ const WeatherApp = () => {
         </form>
         <div className="w-full flex font-schibsted-grotesk items-center gap-8 text-white">
           <div className="flex flex-col text-[24px] leading-[100%]">
-            <p className="font-[700]">Monday</p>
-            <p className="font-[400]">04 September</p>
+            <p className="font-[700]">{days[day]}</p>
+            <p className="font-[400]">{date} {months[month]}</p>
           </div>
-          <p className="text-[49.47px] font-[700]">Jakarta</p>
+          <p className="text-[49.47px] font-[700]">{city}</p>
         </div>
         <div className="w-full h-[2px] bg-white"></div>
         <div className="text-white flex items-center gap-[25px]">
           <div className="flex flex-col gap-2">
             <p className="text-[97.71px] font-azeret-mono leading-[100%]">
-              29°
+              {Math.round(todayWeather.temp)}°
             </p>
             <p className="leading-[100%]">Cloudy</p>
           </div>
@@ -154,9 +194,9 @@ const WeatherApp = () => {
         </div>
         <div className="w-full h-[2px] bg-white"></div>
         <div className="flex w-full justify-between">
-          {status.map((i) => {
+          {status.map((i, idx) => {
             return (
-              <div className="text-white">
+              <div className="text-white" key={idx}>
                 <div className="flex items-center gap-[1rem]">
                   <img src={i.icon} alt="" className="w-[36px]" />
                   <p className="text-[20px]">{i.value}</p>
@@ -174,15 +214,20 @@ const WeatherApp = () => {
           })}
         </div>
         <div className="w-full flex gap-[10px]">
-          {weeklyForecast.map((i) => {
+          {weeklyForecast.map((i, idx) => {
             return (
-              <div className="flex-1/5 p-[10px] bg-[#2D2D2D59] text-white gap-[0.25rem] flex flex-col">
+              <div
+                className="flex-1/5 p-[10px] bg-[#2D2D2D59] text-white gap-[0.25rem] flex flex-col"
+                key={idx}
+              >
                 <p className="font-schibsted-grotesk text-[15px]">{i.day}</p>
                 <div className="flex gap-[4px]">
                   <img src={i.iconWeather} alt="" />
                   <p className="font-azeret-mono">{i.temp}</p>
                 </div>
-                <p className="font-schibsted-grotesk text-[13px]">{i.weather}</p>
+                <p className="font-schibsted-grotesk text-[13px]">
+                  {i.weather}
+                </p>
               </div>
             );
           })}
