@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import useWeather from "@/services/useWeather";
 import { useState } from "react";
 
-
 const theme = createTheme({
   typography: { fontFamily: "var(--font-schibsted-grotesk)" },
   components: {
@@ -44,39 +43,38 @@ const theme = createTheme({
   },
 });
 
-
-const weeklyForecast = [
-  {
-    day: "Tuesday",
-    iconWeather: "/cloud.svg",
-    weather: "Cloudy",
-    temp: "26°",
-  },
-  {
-    day: "Wednesday",
-    iconWeather: "/rainy.svg",
-    weather: "Rainy",
-    temp: "14°",
-  },
-  {
-    day: "Thursday",
-    iconWeather: "/cloud.svg",
-    weather: "Cloudy",
-    temp: "25°",
-  },
-  {
-    day: "Friday",
-    iconWeather: "/clear.svg",
-    weather: "Clear",
-    temp: "32°",
-  },
-  {
-    day: "Saturday",
-    iconWeather: "/cloud.svg",
-    weather: "Cloudy",
-    temp: "22°",
-  },
-];
+// const weeklyForecast = [
+//   {
+//     day: "Tuesday",
+//     iconWeather: "/cloud.svg",
+//     weather: "Cloudy",
+//     temp: "26°",
+//   },
+//   {
+//     day: "Wednesday",
+//     iconWeather: "/rainy.svg",
+//     weather: "Rainy",
+//     temp: "14°",
+//   },
+//   {
+//     day: "Thursday",
+//     iconWeather: "/cloud.svg",
+//     weather: "Cloudy",
+//     temp: "25°",
+//   },
+//   {
+//     day: "Friday",
+//     iconWeather: "/clear.svg",
+//     weather: "Clear",
+//     temp: "32°",
+//   },
+//   {
+//     day: "Saturday",
+//     iconWeather: "/cloud.svg",
+//     weather: "Cloudy",
+//     temp: "22°",
+//   },
+// ];
 
 const months = [
   "January",
@@ -104,48 +102,69 @@ const days = [
 ];
 
 const WeatherApp = () => {
-  const [submittedCity, setSubmittedCity] = useState(null)
-  const weatherData = useWeather(submittedCity)
-  const { error, data } = weatherData
-  console.log(data);
-  const city = data?.city?.name
-  const date = new Date().getDate()
-  const month = new Date().getMonth()
-  const day = new Date().getDay()
+  const [submittedCity, setSubmittedCity] = useState(null);
+  const weatherData = useWeather(submittedCity);
+  const { error, data, weeklyForecast } = weatherData;
+  console.log(weeklyForecast);
+  const city = data?.city?.name;
+  const date = new Date().getDate();
+  const month = new Date().getMonth();
+  const day = new Date().getDay();
   const todayWeather = {
     temp: data?.list[0]?.main?.temp,
-  }
-  
+  };
+
+  const getDayName = (dateString) => {
+    const date = new Date(dateString);
+    return days[date.getDay()];
+  };
+
   const status = [
-  {
-    icon: "/wind.svg",
-    value: `${data?.list[0]?.wind?.speed}/ms`,
-    title: "Wind",
-  },
-  {
-    icon: "/humidity.svg",
-    value: `${data?.list[0]?.main?.humidity}%`,
-    title: "Humidity",
-  },
-  {
-    icon: "/clouds.svg",
-    value: `${data?.list[0]?.clouds?.all}%`,
-    title: "Clouds",
-  },
-  {
-    icon: "/realFeel.svg",
-    value: `${data?.list[0]?.main?.feels_like}%`,
-    title: "Real Feel",
-  },
-];
+    {
+      icon: "/wind.svg",
+      value: `${data?.list[0]?.wind?.speed}/ms`,
+      title: "Wind",
+    },
+    {
+      icon: "/humidity.svg",
+      value: `${data?.list[0]?.main?.humidity}%`,
+      title: "Humidity",
+    },
+    {
+      icon: "/clouds.svg",
+      value: `${data?.list[0]?.clouds?.all}%`,
+      title: "Clouds",
+    },
+    {
+      icon: "/realFeel.svg",
+      value: `${data?.list[0]?.main?.feels_like}%`,
+      title: "Real Feel",
+    },
+  ];
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
   const onSubmit = (data) => {
-    setSubmittedCity(data.city)
+    setSubmittedCity(data.city);
   };
+
+  const getWeatherIcon = (main) => {
+  switch (main.toLowerCase()) {
+    case "clouds":
+      return "/cloud.svg";
+    case "rain":
+    case "drizzle":
+    case "thunderstorm":
+      return "/rainy.svg";
+    case "clear":
+      return "/clear.svg";
+    default:
+      return "/cloud.svg";
+  }
+};
+
   return (
     <section
       className="w-full min-h-screen grid place-items-center"
@@ -178,7 +197,9 @@ const WeatherApp = () => {
         <div className="w-full flex font-schibsted-grotesk items-center gap-8 text-white">
           <div className="flex flex-col text-[24px] leading-[100%]">
             <p className="font-[700]">{days[day]}</p>
-            <p className="font-[400]">{date} {months[month]}</p>
+            <p className="font-[400]">
+              {date} {months[month]}
+            </p>
           </div>
           <p className="text-[49.47px] font-[700]">{city}</p>
         </div>
@@ -214,23 +235,21 @@ const WeatherApp = () => {
           })}
         </div>
         <div className="w-full flex gap-[10px]">
-          {weeklyForecast.map((i, idx) => {
-            return (
-              <div
-                className="flex-1/5 p-[10px] bg-[#2D2D2D59] text-white gap-[0.25rem] flex flex-col"
-                key={idx}
-              >
-                <p className="font-schibsted-grotesk text-[15px]">{i.day}</p>
-                <div className="flex gap-[4px]">
-                  <img src={i.iconWeather} alt="" />
-                  <p className="font-azeret-mono">{i.temp}</p>
+          {
+            weeklyForecast.map((i, idx) => {
+              const icon = getWeatherIcon(i.weather[0].main);
+              return (
+                <div key={idx} className="flex-1/4 text-white flex flex-col gap-2 bg-[#2D2D2D59] px-4 py-2">
+                  <p>{getDayName(i.dt_txt)}</p>
+                  <div className="flex gap-2">
+                    <img src={icon} alt="" />
+                    <p>{Math.round(i.main.temp)}°</p>
+                  </div>
+                  <p>{i.weather[0].main}</p>
                 </div>
-                <p className="font-schibsted-grotesk text-[13px]">
-                  {i.weather}
-                </p>
-              </div>
-            );
-          })}
+              )
+            })
+          }
         </div>
       </div>
     </section>
